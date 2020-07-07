@@ -4,10 +4,11 @@
 #include "Math/Random.h"
 #include "Math/Vector2.h"
 #include "Math/Color.h"
+#include "Graphics/Shape.h"
 #include <string>
 
-std::vector<nc::Vector2> points = { { 0, -3 }, { 3, 3 }, { 0, 1 }, { -3, 3 }, { 0, -3 } };
-nc::Color color{ 0, 1, 0 };
+nc::Shape ship;
+
 nc::Vector2 position{ 400.0f, 300.0f };
 float scale = 4.0f;
 float angle = 0.0f;
@@ -70,27 +71,7 @@ void Draw(Core::Graphics& graphics)
 
 	if (gameOver) graphics.DrawString(400, 300, "Game Over!");
 
-	graphics.SetColor(color.Pack888());
-	//graphics.DrawLine(nc::random(0.0f, 800.0f), nc::random(0.0f, 600.0f), nc::random(0.0f, 800.0f), nc::random(0.0f, 600.0f));
-
-	for (size_t i = 0; i < points.size() - 1; i ++)
-	{
-		nc::Vector2 p1 = points[i];
-		nc::Vector2 p2 = points[i + 1];
-
-		//transform
-		//scale
-		p1 = p1 * scale;
-		p2 = p2 * scale;
-		//rotate
-		p1 = nc::Vector2::Rotate(p1, angle);
-		p2 = nc::Vector2::Rotate(p2, angle);
-		//translate
-		p1 = p1 + position;
-		p2 = p2 + position;
-
-		graphics.DrawLine(p1.x, p1.y, p2.x, p2.y);
-	}
+	ship.Draw(graphics, position, scale, angle);
 	
 }
 
@@ -98,6 +79,9 @@ int main()
 {
 	DWORD time = GetTickCount();
 	std::cout << time / 1000 / 60 / 60 << std::endl;
+
+	ship.Load("ship.txt");
+	ship.SetColor({ 1,1,1 });
 
 	char name[] = "CSC196";
 	Core::Init(name, 800, 600);
