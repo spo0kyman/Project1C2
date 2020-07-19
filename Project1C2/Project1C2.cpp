@@ -8,41 +8,72 @@
 #include <string>
 #include <list>
 
-Player player;
-
 std::list<Enemy*> sceneActors;
-	
-nc::Transform transform{ {400, 300}, 4, 0 };
-
-nc::Vector2 position{ 400.0f, 300.0f };
-float scale = 4.0f;
-float angle = 0.0f;
-
-float speed = 300.0f;
-
-nc::Vector2 velocity;
-float thrust = 100.0f;
 
 float frameTime;
-float roundTime = 0;
-bool gameOver{ false };
+float spawnTimer{ 0 };
 
-float t{ 0 };
+template <typename T>
 
-DWORD prevTime;
-DWORD deltaTime;
+T* GetActor() {
+	T* actor{ nullptr };
+
+	for (nc::Actor* a : sceneActors) {
+		actor = dynamic_cast<T*>(a);
+		if (actor) break;
+	}
+
+	return actor;
+}
+
+template <typename T>
+std::vector<T*> GetActors() {
+	std::vector<T*> actors;
+
+	for (nc::Actor* a : sceneActors) {
+		T* actor = dynamic_cast<T*>(a);
+		if (actor) {
+			actors.push_back(actor);
+		}
+	}
+
+	return actors;
+}
+
+void RemoveActors(nc::Actor* actor) {
+	auto iter = std::find(sceneActors.begin(), sceneActors.end(), actor);
+	if (iter != sceneActors.end()) {
+		delete* iter;
+		sceneActors.erase(iter);
+	}
+}
 
 bool Update(float dt)
 {
 	frameTime = dt;
-	roundTime += dt;
-	if (roundTime >= 5) gameOver = true;
 
-	t = t + (dt * 5.0f);
+	spawnTimer += dt;
+	if (spawnTimer >= 3.0f) {
+		spawnTimer = 0;
 
-	DWORD time = GetTickCount();
-	deltaTime = time - prevTime;
-	prevTime = time;
+		Enemy* enemy = new Enemy;
+		enemy->Load("enemy.txt");
+
+		enemy->SetTarget(GetActor<Player>());
+		enemy->SetSpeed(nc::random(50, 100));
+		enemy->GetTransform().position = nc::Vector2{ nc::random(0,800), nc::random(0,600) };
+		sceneActors.push_back(enemy);
+
+	}
+
+	//if (Core::Input::IsPressed(VK_SPACE)) {
+	//	auto enemies = GetActors<Enemy>();
+	//	RemoveActors();
+
+	//	for (Enemy* enemy : enemies) {
+	//		RemoveActors(enemy);
+	//	}
+	//}
 
 	bool quit = Core::Input::IsPressed(Core::Input::KEY_ESCAPE);
 
@@ -50,7 +81,6 @@ bool Update(float dt)
 	Core::Input::GetMousePos(x, y);
 
 	//PLAYER
-	player.Update(dt);
 
 	//ENEMY
 	//enemy.Update(dt);
@@ -69,21 +99,13 @@ bool Update(float dt)
 
 void Draw(Core::Graphics& graphics)
 {
-	player.Draw(graphics);
 	graphics.SetColor(nc::Color{ 1,1,1 });
 	graphics.DrawString(10, 10, std::to_string(frameTime).c_str());
 	graphics.DrawString(10, 20, std::to_string(1.0f / frameTime).c_str());
-	graphics.DrawString(10, 30, std::to_string(deltaTime).c_str());
 
-	float v = (std::sin(t) + 1.0f) * 0.5f;
 
-	//nc::Color c = nc::Lerp(nc::Color{ 1,0,0 }, nc::Color{ 0,1,0 }, v);
-	//graphics.SetColor(c);
-	//nc::Vector2 p = nc::Lerp(nc::Vector2{ 200,200 }, nc::Vector2{ 600, 200 }, v);
-	//graphics.DrawString(p.x, p.y, "Last Starfighter");
-
-	for (Enemy* e : sceneActors) {
-		e->Draw(graphics);
+	for (Enemy* actor : sceneActors) {
+		actor->Draw(graphics);
 	}
 
 }
@@ -93,15 +115,20 @@ int main()
 	DWORD time = GetTickCount();
 	std::cout << time / 1000 / 60 / 60 << std::endl;
 
-	player.Load("player.txt");
+	Player* player = new Player;
+	player->Load("player.txt");
+	//sceneActors.push_back(player);
 
 	for (size_t i = 0; i < 10; i++) {
 
-		Enemy* e = new Enemy;
-		e->Load("enemy.txt");
-		e->SetTarget(&player);
-		e->GetTransform().position = nc::Vector2{ nc::random(0,800), nc::random(0,600) };
-		sceneActors.push_back(e);
+		nc::Actor* actor = new Enemy;
+		actor->Load("enemy.txt");
+		Enemy* enemy = dynamic_cast<Enemy*>(actor);
+
+		enemy->SetTarget(player);
+		enemy->SetSpeed(nc::random(50, 100));
+		actor->GetTransform().position = nc::Vector2{ nc::random(0,800), nc::random(0,600) };
+		//sceneActors.push_back(actor);
 
 	}
 	char name[] = "CSC196";

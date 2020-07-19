@@ -19,6 +19,15 @@ namespace nc {
 		return success;
 	}
 
+	void Actor::Load(std::istream& stream)
+	{
+		stream >> m_transform;
+
+		std::string shapename;
+		stream >> shapename;
+		m_shape.Load;
+	}
+
 	void nc::Actor::Update(float dt) {
 
 	}

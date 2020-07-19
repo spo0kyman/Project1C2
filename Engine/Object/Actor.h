@@ -12,9 +12,11 @@ namespace nc {
 
 		virtual bool Load(const std::string& filename);
 
+		virtual void Load(std::istream& stream);
+
 		virtual void Update(float dt);
 
-		void Draw(Core::Graphics& graphics);
+		virtual void Draw(Core::Graphics& graphics);
 
 		Transform& GetTransform() {	return m_transform;	}
 
