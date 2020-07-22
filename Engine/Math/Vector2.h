@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 
+
 namespace nc {
 	struct Vector2 {
 		float x, y;

@@ -1,5 +1,8 @@
 #include "Player.h"
 #include "Math/Math.h"
+#include "Projectile.h"
+#include "Object/Scene.h"
+#include "Graphics/ParticleSystem.h"
 #include <fstream>
 
 bool Player::Load(const std::string& filename) {
@@ -19,6 +22,19 @@ bool Player::Load(const std::string& filename) {
 }
 
 void Player::Update(float dt) {
+
+	m_fireTimer += dt;
+	if (Core::Input::IsPressed(VK_SPACE) && m_fireTimer >= m_fireRate) {
+		m_fireTimer = 0;
+
+		Projectile* projectile = new Projectile;
+		projectile->Load("projectile.txt");
+		projectile->GetTransform().position = m_transform.position;
+		projectile->GetTransform().angle = m_transform.angle;
+		m_scene->AddActor(projectile);
+	}
+
+
 	nc::Vector2 force;
 	if (Core::Input::IsPressed('W')) { force = nc::Vector2::forward * m_thrust; }
 	force = nc::Vector2::Rotate(force, m_transform.angle);
@@ -32,11 +48,14 @@ void Player::Update(float dt) {
 	if (m_transform.position.x < 0) m_transform.position.x = 800;
 	if (m_transform.position.y > 600) m_transform.position.y = 0;
 	if (m_transform.position.y < 0) m_transform.position.y = 600;
-	//if (Core::Input::IsPressed('A')) position += nc::Vector2::left * (speed * dt);
-	//if (Core::Input::IsPressed('D')) position += nc::Vector2::right * (speed * dt);
+
 
 	if (Core::Input::IsPressed('A')) m_transform.angle -= dt * nc::DegreesToRadians(360.0f);
 	if (Core::Input::IsPressed('D')) m_transform.angle += dt * nc::DegreesToRadians(360.0f);
+	
+	if (force.LengthSqr() > 0) {
+		g_particleSystem.Create(m_transform.position, m_transform.angle + nc::PI, 20, 1, 1, nc::Color{ 1,1,1 }, 100, 200);
+	}
 
 	m_transform.Update();
 }

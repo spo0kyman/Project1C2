@@ -27,6 +27,15 @@ namespace nc {
 
 			stream.close();
 		}
+
+		m_radius = 0;
+		for (size_t i = 0; i < m_points.size(); i++)
+		{
+			nc::Vector2 p1 = m_points[i];
+			float length = p1.Length();
+
+			if(length > m_radius) m_radius = length;
+		}
 		return success;
 	}
 
