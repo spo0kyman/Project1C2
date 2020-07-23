@@ -1,6 +1,8 @@
 #include "Enemy.h"
 #include "Math/Math.h"
 #include "Graphics/ParticleSystem.h"
+#include "Object/Scene.h"
+#include "../Game.h"
 #include <fstream>
 
 bool Enemy::Load(const std::string& filename){
@@ -33,6 +35,9 @@ void Enemy::OnCollision(Actor* actor)
 {
 	if (actor->GetType() == eType::PROJECTILE) {
 		m_destroy = true;
+
+		m_scene->GetGame()->AddPoints(10);
+
 		nc::Color colors[] = { {1,1,1}, nc::Color::red, {1,1,0}, {0,1,1} };
 		nc::Color color = colors[rand() % 4];
 		g_particleSystem.Create(m_transform.position, 0, 180, 30, 1, color, 100, 200);

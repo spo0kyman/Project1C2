@@ -1,8 +1,11 @@
 #include "Player.h"
 #include "Math/Math.h"
+#include "Math/Random.h"
 #include "Projectile.h"
 #include "Object/Scene.h"
 #include "Graphics/ParticleSystem.h"
+#include "Object/Scene.h"
+#include "../Game.h"
 #include <fstream>
 
 bool Player::Load(const std::string& filename) {
@@ -57,5 +60,18 @@ void Player::Update(float dt) {
 		g_particleSystem.Create(m_transform.position, m_transform.angle + nc::PI, 20, 1, 1, nc::Color{ 1,1,1 }, 100, 200);
 	}
 
+	if (Core::Input::IsPressed('E') && !m_prevButtonPress) {
+		m_transform.position = nc::Vector2{ nc::random(0, 800), nc::random(0, 600) };
+		m_transform.angle = nc::random(0, nc::TWO_PI);
+	}
+	m_prevButtonPress = Core::Input::IsPressed('E');
+
 	m_transform.Update();
+}
+
+void Player::OnCollision(Actor* actor)
+{
+	if (actor->GetType() == eType::ENEMY) {
+		m_scene->GetGame()->SetState(Game::eState::GAME_OVER);
+	}
 }

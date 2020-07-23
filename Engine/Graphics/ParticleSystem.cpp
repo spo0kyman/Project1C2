@@ -9,7 +9,7 @@ namespace nc {
 
 	void ParticleSystem::Startup()
 	{
-		m_size = 300;
+		m_size = 30000;
 		m_particles = new Particle[m_size];
 	}
 

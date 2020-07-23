@@ -3,6 +3,8 @@
 #include "core.h"
 #include <vector>
 
+class Game;
+
 namespace nc {
 
 	class Scene {
@@ -38,7 +40,12 @@ namespace nc {
 		void AddActor(class Actor* actor);
 		void RemoveActor(class Actor* object);
 	
+		void SetGame(Game* game) { m_game = game; }
+		Game* GetGame() { return m_game; }
+		void RemoveAllActors();
+
 	private:
+		Game* m_game;
 		std::list<class Actor*> m_actors;
 	};
 
