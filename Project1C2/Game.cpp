@@ -3,6 +3,7 @@
 #include "Math/Transform.h"
 #include "Actors/Player.h"
 #include "Actors/Enemy.h"
+#include "Actors/Locator.h"
 #include "Object/Scene.h"
 #include "Graphics/ParticleSystem.h"
 #include "Math/Random.h"
@@ -38,6 +39,10 @@ bool Game::Update(float dt)
 		Player* player = new Player;
 		player->Load("player.txt");
 		m_scene.AddActor(player);
+		
+		Locator* locator = new Locator;
+		locator->GetTransform().position = nc::Vector2{ 0, 3 };
+		player->SetChild(locator);
 
 		for (size_t i = 0; i < 10; i++) {
 
@@ -62,33 +67,46 @@ bool Game::Update(float dt)
 			Enemy* enemy = new Enemy;
 			enemy->Load("enemy.txt");
 			enemy->SetTarget(m_scene.GetActor<Player>());
+			
 			enemy->GetTransform().position = nc::Vector2{ nc::random(0,800), nc::random(0,600) };
 			m_scene.AddActor(enemy);
 
 		}
 		if (m_score > m_highScore) m_highScore = m_score;
-		m_scene.Update(dt);
+		
 		break;
-	case Game::eState::GAME_OVER:
-		m_stateTimer += dt;
-		m_scene.RemoveAllActors();
-		if (m_stateTimer >= 3) {
-			m_stateTimer = 0;
-			m_state = eState::TITLE;
+	case Game::eState::PLAYER_DEAD:
+		m_lives--;
+		m_state = (m_lives == 0) ? eState::GAME_OVER : eState::GAME_WAIT;
+		m_stateTimer = 3;
+		break;
+	case Game::eState::GAME_WAIT:
+		m_stateTimer -= dt;
+		if (m_stateTimer <= 0) {
+			m_scene.RemoveAllActors();
+			m_state = eState::GAME_START;
 		}
 		break;
+	case Game::eState::GAME_OVER:
+		m_stateTimer -= dt;
+		m_scene.RemoveAllActors();
+		if (m_stateTimer <= 0) {
+			m_state = eState::TITLE;
+		}
+			break;
 		default:
 			break;
 	}
+		m_scene.Update(dt);
 
-	int x, y;
-	Core::Input::GetMousePos(x, y);
+	//int x, y;
+	//Core::Input::GetMousePos(x, y);
 
-	if (Core::Input::IsPressed(Core::Input::BUTTON_LEFT)) {
-		nc::Color colors[] = { {1,1,1}, nc::Color::red, {1,1,0}, {0,1,1} };
-		nc::Color color = colors[rand() % 4];
-		g_particleSystem.Create({ x,y }, 0, 180, 30, 1, color, 100, 200);
-	}
+	//if (Core::Input::IsPressed(Core::Input::BUTTON_LEFT)) {
+	//	nc::Color colors[] = { {1,1,1}, nc::Color::red, {1,1,0}, {0,1,1} };
+	//	nc::Color color = colors[rand() % 4];
+	//	g_particleSystem.Create({ x,y }, 0, 180, 30, 1, color, 100, 200);
+	//}
 
 	return quit;
 }
@@ -107,9 +125,8 @@ void Game::Draw(Core::Graphics& graphics)
 	case Game::eState::GAME_START:
 		break;
 	case Game::eState::GAME: {
-		std::string score = "score: " + std::to_string(m_score);
-		graphics.DrawString(700, 10, score.c_str());
-		m_scene.Draw(graphics);
+		
+		
 	}
 		break;
 	case Game::eState::GAME_OVER:
@@ -118,12 +135,14 @@ void Game::Draw(Core::Graphics& graphics)
 	default:
 		break;
 	}
-
+	m_scene.Draw(graphics);
 	graphics.SetColor(nc::Color{ 1,1,1 });
-	std::string score = "High Score: " + std::to_string(m_highScore);
+	std::string score = "Score: " + std::to_string(m_score);
+	graphics.DrawString(700, 10, score.c_str());
+	std::string lives = "Lives: " + std::to_string(m_lives);
+	graphics.DrawString(700, 25, lives.c_str());
+	score = "High Score: " + std::to_string(m_highScore);
 	graphics.DrawString(350, 10, score.c_str());
 	m_scene.Draw(graphics);
 
-	
-	
 }

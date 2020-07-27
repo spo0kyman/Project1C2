@@ -23,7 +23,8 @@ bool Enemy::Load(const std::string& filename){
 
 void Enemy::Update(float dt){
 
-	nc::Vector2 direction = m_target->GetTransform().position - m_transform.position;
+	nc::Vector2 targetPosition = (m_target) ? m_target->GetTransform().position : nc::Vector2{ 400, 300 };
+	nc::Vector2 direction = targetPosition -m_transform.position;
 	direction.Normalize();
 	nc::Vector2 velocity = direction * 0;//m_speed;
 	m_transform.position = m_transform.position + (velocity * dt);
@@ -35,7 +36,6 @@ void Enemy::OnCollision(Actor* actor)
 {
 	if (actor->GetType() == eType::PROJECTILE) {
 		m_destroy = true;
-
 		m_scene->GetGame()->AddPoints(10);
 
 		nc::Color colors[] = { {1,1,1}, nc::Color::red, {1,1,0}, {0,1,1} };

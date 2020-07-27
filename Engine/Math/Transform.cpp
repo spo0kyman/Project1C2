@@ -27,7 +27,20 @@ namespace nc {
 		Matrix33 mxt;
 		mxt.Translate(position);
 
-		nc::Matrix33 mx = mxScale * mxRotate * mxt;
+		matrix = mxScale * mxRotate * mxt;
 
+	}
+	void Transform::Update(const Matrix33& mx)
+	{
+		nc::Matrix33 mxScale;
+		mxScale.Scale(scale);
+
+		nc::Matrix33 mxRotate;
+		mxRotate.Rotate(angle);
+
+		Matrix33 mxt;
+		mxt.Translate(position);
+
+		matrix = mxScale * mxRotate * mxt * mx;
 	}
 }

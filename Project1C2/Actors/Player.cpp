@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Enemy.h"
 #include "Math/Math.h"
 #include "Math/Random.h"
 #include "Projectile.h"
@@ -57,7 +58,8 @@ void Player::Update(float dt) {
 	if (Core::Input::IsPressed('D')) m_transform.angle += dt * nc::DegreesToRadians(360.0f);
 	
 	if (force.LengthSqr() > 0) {
-		g_particleSystem.Create(m_transform.position, m_transform.angle + nc::PI, 20, 1, 1, nc::Color{ 1,1,1 }, 100, 200);
+		nc::Vector2 position = m_child->GetTransform().matrix.GetPosition();
+		g_particleSystem.Create(position, m_transform.angle + nc::PI, 20, 1, 1, nc::Color{ 1,1,1 }, 100, 200);
 	}
 
 	if (Core::Input::IsPressed('E') && !m_prevButtonPress) {
@@ -67,11 +69,25 @@ void Player::Update(float dt) {
 	m_prevButtonPress = Core::Input::IsPressed('E');
 
 	m_transform.Update();
+
+	if (m_child) {
+		m_child->Update(dt);
+	}
 }
 
 void Player::OnCollision(Actor* actor)
 {
-	if (actor->GetType() == eType::ENEMY) {
-		m_scene->GetGame()->SetState(Game::eState::GAME_OVER);
+	if (!m_destroy && actor->GetType() == eType::ENEMY) {
+		m_destroy = true;
+		m_scene->GetGame()->SetState(Game::eState::PLAYER_DEAD);
+
+		auto enemies = m_scene->GetActors<Enemy>();
+		for (auto enemy : enemies) {
+			enemy->SetTarget(nullptr);
+		}
+
+		nc::Color colors[] = { {1,1,1}, nc::Color::red, {1,1,0}, {0,1,1} };
+		nc::Color color = colors[rand() % 4];
+		g_particleSystem.Create(m_transform.position, 0, 180, 100, 2, color, 100, 200);
 	}
 }

@@ -10,7 +10,8 @@ namespace nc {
 		enum class eType {
 			PLAYER,
 			ENEMY,
-			PROJECTILE
+			PROJECTILE,
+			LOCATOR
 		};
 
 	public:
@@ -35,10 +36,19 @@ namespace nc {
 		Transform& GetTransform() {	return m_transform;	}
 		Shape& GetShape() {	return m_shape;	} 
 
+		Actor* GetParent() { return m_parent; }
+		Actor* GetChild() { return m_child; }
+
+		void SetParent(Actor* parent) { m_parent = parent; parent->m_child = this; }
+		void SetChild(Actor* child) { m_child = child; child->m_parent = this; }
+
 	protected:
 		bool m_destroy{ false };
 		Scene* m_scene{ nullptr };
 		Transform m_transform;
 		Shape m_shape;
+
+		Actor* m_parent{ nullptr };
+		Actor* m_child{ nullptr };
 	};
 }
