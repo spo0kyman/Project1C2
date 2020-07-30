@@ -5,6 +5,7 @@
 #include "Projectile.h"
 #include "Object/Scene.h"
 #include "Graphics/ParticleSystem.h"
+#include "Audio/AudioSystem.h"
 #include "Object/Scene.h"
 #include "../Game.h"
 #include <fstream>
@@ -30,6 +31,7 @@ void Player::Update(float dt) {
 	m_fireTimer += dt;
 	if (Core::Input::IsPressed(VK_SPACE) && m_fireTimer >= m_fireRate) {
 		m_fireTimer = 0;
+		g_audioSystem.PlayAudio("shoot");
 
 		Projectile* projectile = new Projectile;
 		projectile->Load("projectile.txt");
@@ -53,13 +55,23 @@ void Player::Update(float dt) {
 	if (m_transform.position.y > 600) m_transform.position.y = 0;
 	if (m_transform.position.y < 0) m_transform.position.y = 600;
 
+	float torque{ 0 };
+	if (Core::Input::IsPressed('A')) torque = -20.0f;
+	if (Core::Input::IsPressed('D')) torque = 20.0f;
 
-	if (Core::Input::IsPressed('A')) m_transform.angle -= dt * nc::DegreesToRadians(360.0f);
-	if (Core::Input::IsPressed('D')) m_transform.angle += dt * nc::DegreesToRadians(360.0f);
-	
+	m_angularVelocity = m_angularVelocity + (torque * dt);
+	m_angularVelocity = m_angularVelocity * 0.95;
+	m_transform.angle = m_transform.angle + (m_angularVelocity * dt);
+
 	if (force.LengthSqr() > 0) {
-		nc::Vector2 position = m_child->GetTransform().matrix.GetPosition();
-		g_particleSystem.Create(position, m_transform.angle + nc::PI, 20, 1, 1, nc::Color{ 1,1,1 }, 100, 200);
+
+		Actor* child = m_children[0];
+		nc::Vector2 childPosition = child->GetTransform().matrix.GetPosition();
+		g_particleSystem.Create(child->GetTransform().matrix.GetPosition(), child->GetTransform().matrix.GetAngle() + nc::PI, 20, 1, 1, nc::Color{ 1,1,1 }, 100, 200);
+
+
+		child = m_children[1];
+		g_particleSystem.Create(child->GetTransform().matrix.GetPosition(), child->GetTransform().matrix.GetAngle() + nc::PI, 20, 1, 1, nc::Color{ 1,1,1 }, 100, 200);
 	}
 
 	if (Core::Input::IsPressed('E') && !m_prevButtonPress) {
@@ -70,16 +82,17 @@ void Player::Update(float dt) {
 
 	m_transform.Update();
 
-	if (m_child) {
-		m_child->Update(dt);
+	for (auto child : m_children) {
+		child->Update(dt);
 	}
-}
 
+}
 void Player::OnCollision(Actor* actor)
 {
 	if (!m_destroy && actor->GetType() == eType::ENEMY) {
 		m_destroy = true;
 		m_scene->GetGame()->SetState(Game::eState::PLAYER_DEAD);
+		g_audioSystem.PlayAudio("playerDeath");
 
 		auto enemies = m_scene->GetActors<Enemy>();
 		for (auto enemy : enemies) {

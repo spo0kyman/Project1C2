@@ -18,6 +18,9 @@
     <Filter Include="Object">
       <UniqueIdentifier>{bc140915-4099-4a21-bbbf-376ade695525}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Audio">
+      <UniqueIdentifier>{14b2281a-7093-4ed6-a719-46a8a4007f5d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -62,6 +65,9 @@
     <ClInclude Include="Graphics\Particle.h">
       <Filter>Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Audio\AudioSystem.h">
+      <Filter>Audio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -90,6 +96,9 @@
     </ClCompile>
     <ClCompile Include="Graphics\ParticleSystem.cpp">
       <Filter>Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\AudioSystem.cpp">
+      <Filter>Audio</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

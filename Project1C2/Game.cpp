@@ -6,12 +6,16 @@
 #include "Actors/Locator.h"
 #include "Object/Scene.h"
 #include "Graphics/ParticleSystem.h"
+#include "Audio/AudioSystem.h"
 #include "Math/Random.h"
 #include <list>
 
 
 void Game::Initialize()
 {
+	g_audioSystem.AddAudio("playerDeath", "playerdeath.wav");
+	g_audioSystem.AddAudio("enemyDeath", "enemydeath.wav");
+	g_audioSystem.AddAudio("shoot", "shoot.wav");
 	m_scene.Startup();
 	m_scene.SetGame(this);
 }
@@ -20,6 +24,7 @@ bool Game::Update(float dt)
 {
 	m_frameTime = dt;
 	bool quit = Core::Input::IsPressed(Core::Input::KEY_ESCAPE);
+	g_audioSystem.Update(dt);
 
 	switch (m_state)
 	{
@@ -41,18 +46,25 @@ bool Game::Update(float dt)
 		m_scene.AddActor(player);
 		
 		Locator* locator = new Locator;
-		locator->GetTransform().position = nc::Vector2{ 0, 3 };
-		player->SetChild(locator);
+		locator->GetTransform().position = nc::Vector2{ 2, 2 };
+		player->AddChild(locator);
+
+		locator = new Locator;
+		locator->GetTransform().position = nc::Vector2{ -2, 2 };
+		player->AddChild(locator);
 
 		for (size_t i = 0; i < 10; i++) {
 
 			nc::Actor* actor = new Enemy;
 			actor->Load("enemy.txt");
 			Enemy* enemy = dynamic_cast<Enemy*>(actor);
+			float distance = nc::random(300, 200);
+			float angle = nc::random(0, nc::TWO_PI);
+			nc::Vector2 position = nc::Vector2::Rotate({ 0.0f,distance }, angle);
 
 			enemy->SetTarget(player);
 			enemy->SetSpeed(nc::random(50, 100));
-			actor->GetTransform().position = nc::Vector2{ nc::random(0,800), nc::random(0,600) };
+			actor->GetTransform().position = nc::Vector2{400, 300 } + position;
 			m_scene.AddActor(actor);
 
 		}
@@ -68,7 +80,10 @@ bool Game::Update(float dt)
 			enemy->Load("enemy.txt");
 			enemy->SetTarget(m_scene.GetActor<Player>());
 			
-			enemy->GetTransform().position = nc::Vector2{ nc::random(0,800), nc::random(0,600) };
+			float distance = nc::random(300, 200);
+			float angle = nc::random(0, nc::TWO_PI);
+			nc::Vector2 position = nc::Vector2::Rotate({ 0.0f,distance }, angle);
+			enemy->GetTransform().position = m_scene.GetActor<Player>()->GetTransform().position + position;
 			m_scene.AddActor(enemy);
 
 		}

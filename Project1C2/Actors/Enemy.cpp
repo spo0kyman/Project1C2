@@ -1,6 +1,7 @@
 #include "Enemy.h"
 #include "Math/Math.h"
 #include "Graphics/ParticleSystem.h"
+#include "Audio/AudioSystem.h"
 #include "Object/Scene.h"
 #include "../Game.h"
 #include <fstream>
@@ -37,6 +38,7 @@ void Enemy::OnCollision(Actor* actor)
 	if (actor->GetType() == eType::PROJECTILE) {
 		m_destroy = true;
 		m_scene->GetGame()->AddPoints(10);
+		g_audioSystem.PlayAudio("enemyDeath");
 
 		nc::Color colors[] = { {1,1,1}, nc::Color::red, {1,1,0}, {0,1,1} };
 		nc::Color color = colors[rand() % 4];

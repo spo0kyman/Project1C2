@@ -38,8 +38,16 @@ namespace nc {
 
 		}
 
-		Vector2 GetPosition() {
+		Vector2 GetPosition() const {
 			return Vector2{ m[0][2], m[1][2] };
+		}
+
+		Vector2 GetScale() const {
+			return { m[0][0], m[1][1] };
+		}
+
+		float GetAngle() const {
+			return std::atan2(m[1][0], m[0][0]);
 		}
 
 		void SetIdentity() {

@@ -17,9 +17,10 @@ protected:
 	float m_thrust{ 200 };
 	float m_rotation{ 0 };
 	float m_fireRate{ 0.2f };
-	float m_fireTimer{ 0 };
+	float m_fireTimer{ 1 };
 
 	bool m_prevButtonPress{ false };
 
 	nc::Vector2 m_velocity;
+	float m_angularVelocity{ 0 };
 };
